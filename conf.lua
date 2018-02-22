@@ -5,7 +5,7 @@ function love.conf( t )
 
   t.window.title = "Dungeon Bombers";
   t.window.icon = 'res/img/icon.png';
-  t.window.width = 1276;
+  t.window.width = 1284;
   t.window.height = 724;
   t.window.borderless = false;
   t.window.resizable = true;
