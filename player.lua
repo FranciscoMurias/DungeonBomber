@@ -119,7 +119,7 @@ function Player:update(dt)
 end
 
 function Player:draw()
-	self.playerSprite:draw()
+	self.playerSprite:draw(self.origin.x, self.origin.y)
 end
 
 return Player
