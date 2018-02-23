@@ -3,6 +3,7 @@ local bump = require "lib/bump"
 local screen = require "lib/shack/shack"
 
 local Player = require 'player'
+local Bomb = require 'bomb'
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 
@@ -17,7 +18,14 @@ function love.load() -----------------------------------------------------------
   map = sti("res/maps/dungeon3.lua", {"bump"})
 	map:bump_init(world)
 
+	function map:toTile(x, y)
+		x = math.floor(x / 15) * 15
+		y = math.floor(y / 15) * 15
+		return x, y
+	end
+
 	player = Player(0, 0)
+	bombs = {}
 
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
 
@@ -29,7 +37,11 @@ function love.update(dt) -------------------------------------------------------
 	map:update(dt)
 	player:update(dt)
 	screen:update(dt)
-	screen:setShake(2) -- test screenshake - seems to be apllying differently to the player and the scenery
+	--screen:setShake(2) -- test screenshake - seems to be apllying differently to the player and the scenery
+
+	for _, bomb in ipairs(bombs) do
+		bomb:update(dt)
+	end
 end
 
 function love.draw() ----------------------------------------------------------------------------------------
@@ -37,6 +49,10 @@ function love.draw() -----------------------------------------------------------
 
 	map:draw(0, 0)
 	player:draw()
+
+	for _, bomb in ipairs(bombs) do
+		bomb:draw()
+	end
 
 	if debug then
 		for _, item in ipairs(world:getItems()) do
@@ -57,5 +73,8 @@ function love.keypressed(key)
 		love.event.quit()
 	elseif key == 'tab' then
 		debug = not debug
+	elseif key == 'x' then
+		local bomb = Bomb(player.position:unpack())
+		table.insert(bombs, bomb)
 	end
 end

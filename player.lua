@@ -1,5 +1,4 @@
 local sodapop = require "lib/sodapop"
-
 local Object = require 'lib.classic.classic'
 
 local Vector = require 'vector'
@@ -90,7 +89,7 @@ end
 
 function Player:update(dt)
 	local velocity = Vector(0, 0)
-	
+
 	if love.keyboard.isDown('right') then
 		velocity.x = self.speed * dt
 	elseif love.keyboard.isDown('left') then
