@@ -21,17 +21,16 @@ function Vector:unpack()
   return self.x, self.y
 end
 
--- return the closest Integer Value
-function Vector:intVal()
-  if self.x > 0.5 then self.x = 1
-  elseif self.x < -0.5 then self.x = -1
-  else self.x = 0
+-- returns the normalized vector (unit vector)
+function Vector:normalize()
+  local length = self:length()
+  if length == 0 then
+    return Vector(0, 0)
   end
-  if self.y > 0.5 then self.y = 1
-  elseif self.y < -0.5 then self.y = -1
-  else self.y = 0
-  end
-  return Vector(self.x, self.y)
+
+  local x = self.x / length
+  local y = self.y / length
+  return Vector(x, y)
 end
 
 -- add two vectors: Vector(1, 2) + Vector(3, 4)

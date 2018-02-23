@@ -65,11 +65,11 @@ function Player:new(x, y)
 	})
 
 	self.playerSprite:setAnchor(function()
-		return self.position.x + self.origin.x, self.position.y + self.origin.y
+		return self.position.x, self.position.y
 	end)
 
 	function updateAnimation(vector)
-		if vector == Vector(-1, 0) then self.playerSprite:switch 'walkSide' 
+		if vector == Vector(-1, 0) then self.playerSprite:switch 'walkSide'
 			self.playerSprite.flipX = true end
 		if vector == Vector(1, 0) then self.playerSprite:switch 'walkSide'
 			self.playerSprite.flipX = false end
@@ -78,7 +78,7 @@ function Player:new(x, y)
 	end
 
 	function updateIdle(vector)
-		if vector == Vector(-1, 0) then self.playerSprite:switch 'idleSide' 
+		if vector == Vector(-1, 0) then self.playerSprite:switch 'idleSide'
 			self.playerSprite.flipX = true end
 		if vector == Vector(1, 0) then self.playerSprite:switch 'idleSide'
 			self.playerSprite.flipX = false end
@@ -94,28 +94,23 @@ function Player:update(dt)
 		velocity.x = self.speed * dt
 	elseif love.keyboard.isDown('left') then
 		velocity.x = -self.speed * dt
-	end
-	if love.keyboard.isDown('down') then
+	elseif love.keyboard.isDown('down') then
 		velocity.y = self.speed * dt
 	elseif love.keyboard.isDown('up') then
 		velocity.y = -self.speed * dt
 	end
 
 	if velocity ~= Vector(0, 0) then
-    local newPosition = self.position + velocity
-	local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y)
-    self.position = Vector(actualX, actualY)
-	-- print(self.position.x)
-	
-	print(math.floor(velocity.x))
-	-- animation control
-	local normalDirection = Vector(math.floor(velocity.x), math.floor(velocity.y))
-	-- print(normalDirection.x)
-	if normalDirection ~= self.direction then
-		updateAnimation(normalDirection)
-		self.direction = normalDirection
-	end
+		local newPosition = self.position + velocity
+		local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y)
+		self.position = Vector(actualX, actualY)
 
+		-- animation control
+		local normalized = velocity:normalize()
+		if normalized ~= self.direction then
+			self.direction = velocity:normalize()
+			updateAnimation(self.direction)
+		end
 	else
 		updateIdle(self.direction)
 	end
@@ -124,7 +119,7 @@ function Player:update(dt)
 end
 
 function Player:draw()
-	self.playerSprite:draw(33,8)
+	self.playerSprite:draw()
 end
 
 return Player
