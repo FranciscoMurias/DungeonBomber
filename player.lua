@@ -68,6 +68,24 @@ function Player:new(x, y)
 		return self.position.x + self.origin.x, self.position.y + self.origin.y
 	end)
 
+	function updateAnimation(vector)
+		if vector == Vector(-1, 0) then self.playerSprite:switch 'walkSide' 
+			self.playerSprite.flipX = true end
+		if vector == Vector(1, 0) then self.playerSprite:switch 'walkSide'
+			self.playerSprite.flipX = false end
+		if vector == Vector(0, 1) then self.playerSprite:switch 'walkDown' end
+		if vector == Vector(0, -1) then self.playerSprite:switch 'walkUp' end
+	end
+
+	function updateIdle(vector)
+		if vector == Vector(-1, 0) then self.playerSprite:switch 'idleSide' 
+			self.playerSprite.flipX = true end
+		if vector == Vector(1, 0) then self.playerSprite:switch 'idleSide'
+			self.playerSprite.flipX = false end
+		if vector == Vector(0, 1) then self.playerSprite:switch 'idleDown' end
+		if vector == Vector(0, -1) then self.playerSprite:switch 'idleUp' end
+	end
+
 end
 
 function Player:update(dt)
@@ -83,33 +101,23 @@ function Player:update(dt)
 		velocity.y = -self.speed * dt
 	end
 
-	function love.keypressed(key)
-		if key == 'left' then self.playerSprite:switch 'walkSide' 
-			self.playerSprite.flipX = true end
-		if key == 'right' then self.playerSprite:switch 'walkSide'
-			self.playerSprite.flipX = false end
-		if key == 'down' then self.playerSprite:switch 'walkDown' end
-		if key == 'up' then self.playerSprite:switch 'walkUp' end
-	end
-
-	function love.keyreleased(key)
-		if key == 'left' then self.playerSprite:switch 'idleSide' 
-			self.playerSprite.flipX = true end
-		if key == 'right' then self.playerSprite:switch 'idleSide'
-			self.playerSprite.flipX = false end
-		if key == 'down' then self.playerSprite:switch 'idleDown' end
-		if key == 'up' then self.playerSprite:switch 'idleUp' end
-	end
-
 	if velocity ~= Vector(0, 0) then
     local newPosition = self.position + velocity
-	  local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y)
+	local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y)
     self.position = Vector(actualX, actualY)
-		print(self.position.x)
-		-- animation control
-		
+	-- print(self.position.x)
+	
+	print(math.floor(velocity.x))
+	-- animation control
+	local normalDirection = Vector(math.floor(velocity.x), math.floor(velocity.y))
+	-- print(normalDirection.x)
+	if normalDirection ~= self.direction then
+		updateAnimation(normalDirection)
+		self.direction = normalDirection
+	end
 
 	else
+		updateIdle(self.direction)
 	end
 
 	self.playerSprite:update(dt)
