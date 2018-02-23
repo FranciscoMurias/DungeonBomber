@@ -90,11 +90,14 @@ end
 
 function Player:update(dt)
 	local velocity = Vector(0, 0)
+	
 	if love.keyboard.isDown('right') then
 		velocity.x = self.speed * dt
 	elseif love.keyboard.isDown('left') then
 		velocity.x = -self.speed * dt
-	elseif love.keyboard.isDown('down') then
+	end
+
+	if love.keyboard.isDown('down') then
 		velocity.y = self.speed * dt
 	elseif love.keyboard.isDown('up') then
 		velocity.y = -self.speed * dt
