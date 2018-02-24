@@ -4,6 +4,7 @@ local screen = require "lib/shack/shack"
 
 local Player = require 'player'
 local Bomb = require 'bomb'
+local softObject = require 'softObject'
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 
@@ -24,8 +25,9 @@ function love.load() -----------------------------------------------------------
 		return x, y
 	end
 
-	player = Player(0, 0)
+	player = Player(3, 6)
 	bombs = {}
+	softObjects = {}
 
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
 
@@ -42,6 +44,10 @@ function love.update(dt) -------------------------------------------------------
 	for _, bomb in ipairs(bombs) do
 		bomb:update(dt)
 	end
+
+	for _, softObject in ipairs(softObjects) do
+		softObject:update(dt)
+	end
 end
 
 function love.draw() ----------------------------------------------------------------------------------------
@@ -52,6 +58,10 @@ function love.draw() -----------------------------------------------------------
 
 	for _, bomb in ipairs(bombs) do
 		bomb:draw()
+	end
+
+	for _, softObject in ipairs(softObjects) do
+		softObject:draw()
 	end
 
 	if debug then
