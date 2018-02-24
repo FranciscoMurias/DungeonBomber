@@ -25,7 +25,7 @@ function love.load() -----------------------------------------------------------
 	math.randomseed( os.time() )
 	map:foreach(function(x, y, value)
 		local chance = math.random()
-		if value == 0 and chance < 0.3 then
+		if value == 0 and chance < 0.7 then
 			local softObject = softObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
 			table.insert(objects, softObject)
 			world:add(softObject, softObject.position.x, softObject.position.y, softObject.width, softObject.height)
@@ -92,8 +92,8 @@ function love.keypressed(key)
 	elseif key == 'tab' then
 		debug = not debug
 	elseif key == 'x' then
-		local x, y = map:toTile(player.position:unpack())
+		local x, y = map:toTile(player.position.x + 5, player.position.y + 3)
 		local bomb = Bomb(x, y)
-		table.insert(bombs, bomb)
+		table.insert(objects, bomb)
 	end
 end
