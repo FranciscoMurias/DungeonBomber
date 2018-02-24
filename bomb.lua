@@ -15,7 +15,7 @@ function Bomb:new(x, y)
 	self.sprite:addAnimation('idle', {
 		image	= love.graphics.newImage('res/tiles/items.png'),
 		frameWidth = 15,
-		frameHeight = 15,
+		frameHeight = 17,
 		frames = {
 			{7, 1, 7, 1, .3},
 		},
