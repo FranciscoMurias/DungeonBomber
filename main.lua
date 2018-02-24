@@ -29,6 +29,14 @@ function love.load() -----------------------------------------------------------
 	bombs = {}
 	softObjects = {}
 
+	math.randomseed( os.time() )
+	for i=1, math.random(50,100) do
+		local x, y = map:toTile(math.random(0*15,17*15),math.random(0*15,11*15))
+		-- if ... contraints: conrners and no overlap
+		local softObject = softObject(x, y, math.random(1,5))
+		table.insert(softObjects, softObject)
+	end
+
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
 
 	scale = 4.0
