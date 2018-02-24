@@ -1,5 +1,5 @@
-local sodapop = require "lib/sodapop"
 local Object = require 'lib.classic.classic'
+local sodapop = require "lib/sodapop"
 
 local Vector = require 'vector'
 

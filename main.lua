@@ -37,7 +37,7 @@ function love.update(dt) -------------------------------------------------------
 	map:update(dt)
 	player:update(dt)
 	screen:update(dt)
-	--screen:setShake(2) -- test screenshake - seems to be apllying differently to the player and the scenery
+	--screen:setShake(2) 
 
 	for _, bomb in ipairs(bombs) do
 		bomb:update(dt)
