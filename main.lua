@@ -37,7 +37,7 @@ function love.update(dt) -------------------------------------------------------
 	map:update(dt)
 	player:update(dt)
 	screen:update(dt)
-	--screen:setShake(2) 
+	--screen:setShake(2)
 
 	for _, bomb in ipairs(bombs) do
 		bomb:update(dt)
@@ -74,7 +74,8 @@ function love.keypressed(key)
 	elseif key == 'tab' then
 		debug = not debug
 	elseif key == 'x' then
-		local bomb = Bomb(player.position:unpack())
+		local x, y = map:toTile(player.position:unpack())
+		local bomb = Bomb(x, y)
 		table.insert(bombs, bomb)
 	end
 end

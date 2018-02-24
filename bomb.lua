@@ -11,7 +11,7 @@ function Bomb:new(x, y)
   self.height = 15
   self.origin = Vector(5, 2)
 
-	self.sprite = sodapop.newAnimatedSprite(x, y)
+	self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
 	self.sprite:addAnimation('idle', {
 		image	= love.graphics.newImage('res/tiles/items.png'),
 		frameWidth = 15,
@@ -20,6 +20,10 @@ function Bomb:new(x, y)
 			{7, 1, 7, 1, .3},
 		},
 	})
+end
+
+function Bomb:center()
+	return self.position + Vector(self.width / 2, self.height / 2)
 end
 
 function Bomb:update(dt)
