@@ -8,7 +8,7 @@ local softObject = Object:extend()
 function softObject:new(x, y, variant)
   self.position = Vector(x, y)
   self.width = 15
-  self.height = 17
+  self.height = 15
   self.origin = Vector(0, -2)
   self.state = 1
   self.variant = variant
