@@ -92,8 +92,8 @@ function love.keypressed(key)
 	elseif key == 'tab' then
 		debug = not debug
 	elseif key == 'x' then
-		local x, y = map:toTile(player.position.x + 5, player.position.y + 3)
-		local bomb = Bomb(x, y)
+		local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
+		local bomb = Bomb(x, y-2)
 		table.insert(objects, bomb)
 	end
 end
