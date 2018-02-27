@@ -13,11 +13,11 @@ function Bomb:new(x, y)
 
 	self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
 	self.sprite:addAnimation('idle', {
-		image	= love.graphics.newImage('res/tiles/items.png'),
+		image	= love.graphics.newImage('res/sprites/bomb.png'),
 		frameWidth = 15,
-		frameHeight = 17,
+		frameHeight = 15,
 		frames = {
-			{7, 1, 7, 1, .3},
+			{1, 1, 4, 1, .2},
 		},
 	})
 end

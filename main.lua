@@ -1,10 +1,11 @@
-local sti = require "lib/sti"
 local bump = require "lib/bump"
 local screen = require "lib/shack/shack"
 
+local Vector = require 'vector'
 local Player = require 'player'
 local Bomb = require 'bomb'
 local softObject = require 'softObject'
+local Map = require 'map'
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 
@@ -15,27 +16,30 @@ debug = false
 
 function love.load() ----------------------------------------------------------------------------------------
 	world = bump.newWorld()
-	-- load map
-  map = sti("res/maps/dungeon3.lua", {"bump"})
-	map:bump_init(world)
 
-	function map:toTile(x, y)
-		x = math.floor(x / 15) * 15
-		y = math.floor(y / 15) * 15
-		return x, y
-	end
+	map = Map()
 
 	player = Player(3, 6)
-	bombs = {}
-	softObjects = {}
+	objects = {player}
 
 	math.randomseed( os.time() )
-	for i=1, math.random(50,100) do
-		local x, y = map:toTile(math.random(0*15,17*15),math.random(0*15,11*15))
-		-- if ... contraints: conrners and no overlap
-		local softObject = softObject(x, y, math.random(1,5))
-		table.insert(softObjects, softObject)
-	end
+	map:foreach(function(x, y, value)
+		local chance = math.random()
+		if value == 0 and chance < 0.7 then
+			local softObject = softObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
+			table.insert(objects, softObject)
+			world:add(softObject, softObject.position.x, softObject.position.y, softObject.width, softObject.height)
+		elseif value == 1 then
+			local x = x - 1
+			local y = y - 1
+			local wall = {
+				position = Vector(x * 15, y * 15),
+				width = 15,
+				height = 15,
+			}
+			world:add(wall, wall.position.x, wall.position.y, wall.width, wall.height)
+		end
+	end)
 
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
 
@@ -45,31 +49,27 @@ end
 
 function love.update(dt) ------------------------------------------------------------------------------------
 	map:update(dt)
-	player:update(dt)
 	screen:update(dt)
 	--screen:setShake(2)
 
-	for _, bomb in ipairs(bombs) do
-		bomb:update(dt)
-	end
-
-	for _, softObject in ipairs(softObjects) do
-		softObject:update(dt)
+	for _, object in ipairs(objects) do
+		object:update(dt)
 	end
 end
 
 function love.draw() ----------------------------------------------------------------------------------------
+	-- y-sort objects
+	table.sort(objects, function(a, b)
+		return a.position.y + a.height < b.position.y + b.height
+	end)
+
 	love.graphics.setCanvas(canvas)
+	love.graphics.clear()
 
 	map:draw(0, 0)
-	player:draw()
 
-	for _, bomb in ipairs(bombs) do
-		bomb:draw()
-	end
-
-	for _, softObject in ipairs(softObjects) do
-		softObject:draw()
+	for _, object in ipairs(objects) do
+		object:draw()
 	end
 
 	if debug then
@@ -92,8 +92,8 @@ function love.keypressed(key)
 	elseif key == 'tab' then
 		debug = not debug
 	elseif key == 'x' then
-		local x, y = map:toTile(player.position:unpack())
-		local bomb = Bomb(x, y)
-		table.insert(bombs, bomb)
+		local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
+		local bomb = Bomb(x, y-2)
+		table.insert(objects, bomb)
 	end
 end
