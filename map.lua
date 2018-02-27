@@ -30,20 +30,44 @@ function Map:numNeighbors(x, y)
 	return num
 end
 
+function Map:getNeighbors(x, y)
+	local neighbors = {}
+	if x ~= 1 then
+		table.insert(neighbors, Vector(x - 1, y))
+	end
+	if y ~= 1 then
+		table.insert(neighbors, Vector(x, y - 1))
+	end
+	if x ~= self.width then
+		table.insert(neighbors, Vector(x + 1, y))
+	end
+	if y ~= self.height then
+		table.insert(neighbors, Vector(x, y + 1))
+	end
+	return neighbors
+end
+
+function Map:adjacentToCorner(x, y)
+	if (x == 1 or x == self.width) and (y == 2 or y == self.height - 1) then
+		return true
+	end
+	if (y == 1 or y == self.height) and (x == 2 or x == self.width - 1) then
+		return true
+	end
+	return false
+end
+
 function Map:generateLayout()
 	for row = 1, self.height do
 		self.tiles[row] = {}
 		for col = 1, self.width do
-			if row > 1 and row < self.height and col > 1 and col < self.width then
-				if row % 2 == 0 and col % 2 == 0 then
-					self.tiles[row][col] = 1
-				else
-					self.tiles[row][col] = 0
-				end
+			if row % 2 == 0 and col % 2 == 0 then
+				self.tiles[row][col] = 1
 			else
-				if self:numNeighbors(col, row) <= 2 then
-					self.tiles[row][col] = -1
-				end
+				self.tiles[row][col] = 0
+			end
+			if self:adjacentToCorner(col, row) or self:numNeighbors(col, row) == 2 then
+				self.tiles[row][col] = -1
 			end
 		end
 	end
