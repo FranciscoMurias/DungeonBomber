@@ -30,6 +30,17 @@ function Bomb:new(x, y)
 			{1, 1, 4, 1, .2},
 		},
 	})
+
+	self.explosionSprite = sodapop.newAnimatedSprite(self:center():unpack())
+	self.explosionSprite:addAnimation('explode1', {
+		image	= love.graphics.newImage('res/sprites/explosion1.png'),
+		frameWidth = 47,
+		frameHeight = 39,
+		frames = {
+			{1, 1, 16, 1, .04},
+		},
+		stopAtEnd    = true
+	})
 end
 
 function Bomb:center()
@@ -38,7 +49,7 @@ end
 
 function Bomb:update(dt)
 	if self.exploded then
-
+		self.explosionSprite:update(dt)
 		return
 	end
 	if self.timer > self.fuseDuration then
@@ -57,6 +68,7 @@ function Bomb:update(dt)
 					if hitWall then
 						directions[direction] = false
 					else
+						-- check for colision with softobject and only explode the first softobject tile, not all of them ones in the radius
 						table.insert(self.explosions, {
 								x = tile.x,
 								y = tile.y,
@@ -72,9 +84,10 @@ function Bomb:update(dt)
 		if self.timer < self.explosionDuration then
 			screen:setShake(3)
 		end
-
-		--for i=0, self.numExplosions do
-		--	table.remove(self.explosions, i) -- something's not right here
+		--if self.timer > self.explosionDuration then
+			--for i=0, self.numExplosions do
+			--	table.remove(self.explosions, i) -- something's not right here
+			--end
 		--end
 	end
 
@@ -86,8 +99,10 @@ function Bomb:draw()
 	if self.exploded == false then self.sprite:draw()
 	else 
 		for _, exp in ipairs(self.explosions) do
+			self.explosionSprite:draw(math.random(0,3),math.random(0,3)) -- add subsequent explosions here.. later with a time delay
 			love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
 		end
+		self.explosionSprite:draw(math.random(0,3),math.random(0,3))
 		love.graphics.setColor(255, 0, 0, 255)
 		love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
 		love.graphics.setColor(255, 255, 255, 255)
@@ -102,7 +117,9 @@ function Bomb:check(x, y)
 			hitWall = true
 		elseif item:is(SoftObject) then
 			item.destroyed = true
-			-- on triggering 'destroyed' to true, call a function that spawns debris particles in the item location and applies random force
+			-- on triggering 'destroyed' to true:
+			-- call a function that spawns debris particles in the item location and applies random force
+			-- call a function that spawns a random power up item on the tile location based on a set probability
 			world:remove(item)
 		end
 	end

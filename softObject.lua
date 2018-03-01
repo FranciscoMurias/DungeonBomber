@@ -39,6 +39,7 @@ end
 
 function SoftObject:update(dt)
 	if self.destroyed then
+		
 		return
 	end
 	self.sprite:update(dt)
