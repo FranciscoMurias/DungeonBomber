@@ -3,6 +3,7 @@ local sodapop = require "lib/sodapop"
 
 local Vector = require 'vector'
 local PowerUp = require 'powerUp'
+local Debris = require 'debris'
 
 local SoftObject = Object:extend()
 
@@ -60,6 +61,13 @@ function SoftObject:SpawnPowerUp()
 		-- world:add(powerUp, powerUp.position.x, powerUp.position.y, powerUp.width, powerUp.height) -- colide player to pick up powerup?
 	return
 	end
+end
+
+function SoftObject:DebrisDestruction()
+	-- local numParticles = math.random(8,15)
+	local debris = Debris()
+	--table.insert(objects, debris)
+	return
 end
 
 return SoftObject

@@ -16,7 +16,7 @@ function Bomb:new(x, y)
 	self.explosionDuration = self.fuseDuration + 0.6
 	self.timer = 0
 	self.exploded = false
-	self.radius = 1
+	self.radius = 10
 	
 	self.numExplosions = 0
 	self.explosions = {}
@@ -117,8 +117,7 @@ function Bomb:check(x, y)
 		elseif item:is(SoftObject) then
 			item.destroyed = true
 			item:SpawnPowerUp()
-			-- on triggering 'destroyed' to true:
-			-- call a function that spawns debris particles in the item location and applies random force
+			item:DebrisDestruction()
 			world:remove(item)
 			hit = true
 		end
