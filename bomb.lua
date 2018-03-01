@@ -117,9 +117,9 @@ function Bomb:check(x, y)
 			hitWall = true
 		elseif item:is(SoftObject) then
 			item.destroyed = true
+			item:SpawnPowerUp()
 			-- on triggering 'destroyed' to true:
 			-- call a function that spawns debris particles in the item location and applies random force
-			-- call a function that spawns a random power up item on the tile location based on a set probability
 			world:remove(item)
 		end
 	end

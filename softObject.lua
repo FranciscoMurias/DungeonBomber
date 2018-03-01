@@ -2,6 +2,7 @@ local Object = require 'lib.classic.classic'
 local sodapop = require "lib/sodapop"
 
 local Vector = require 'vector'
+local PowerUp = require 'powerUp'
 
 local SoftObject = Object:extend()
 
@@ -39,8 +40,7 @@ end
 
 function SoftObject:update(dt)
 	if self.destroyed then
-		
-		return
+
 	end
 	self.sprite:update(dt)
 end
@@ -50,6 +50,16 @@ function SoftObject:draw()
 		return
 	end
 	self.sprite:draw(self.origin.x, self.origin.y)
+end
+
+function SoftObject:SpawnPowerUp()
+	local chance = math.random()
+	if chance < 0.25 then
+		local powerUp = PowerUp(self.position.x , self.position.y , math.random(1,2))
+		table.insert(objects, powerUp)
+		-- world:add(powerUp, powerUp.position.x, powerUp.position.y, powerUp.width, powerUp.height) -- colide player to pick up powerup?
+	return
+	end
 end
 
 return SoftObject

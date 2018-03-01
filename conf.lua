@@ -5,12 +5,12 @@ function love.conf( t )
 
   t.window.title = "Dungeon Bombers";
   t.window.icon = 'res/img/icon.png';
-  t.window.width = 1284;
-  t.window.height = 724;
+  t.window.width = 1444;
+  t.window.height = 816;
   t.window.borderless = false;
   t.window.resizable = true;
-  t.window.minwidth = 638;
-  t.window.minheight = 362;
+  t.window.minwidth = 722;
+  t.window.minheight = 408;
   t.window.fullscreen = false;
   t.window.fullscreentype = "desktop";
   t.window.vsync = true;

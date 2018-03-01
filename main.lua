@@ -82,7 +82,7 @@ function love.draw() -----------------------------------------------------------
 	love.graphics.scale(scale)
 
 	screen:apply()
-	love.graphics.draw(canvas, 0, 0, 0, 1, 1, -33, -8)
+	love.graphics.draw(canvas, 0, 0, 0, 1, 1, -53, -18)
 end
 
 function love.keypressed(key)
@@ -92,8 +92,8 @@ function love.keypressed(key)
 		debug = not debug
 	elseif key == 'x' then
 		local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
-		local bomb = Bomb(x, y)
+		local bomb = Bomb(x, y-2)
 		table.insert(objects, bomb)
-		-- world:add(bomb, x, y, 15, 15) -- need to check if player is present on tile and only call after that is false
+		-- world:add(bomb, x, y, 15, 15) -- need to check if player is present on tile and only call after that is false and remove colider once exploded
 	end
 end

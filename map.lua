@@ -12,7 +12,7 @@ function Map:new()
 	self.tileheight = 15
 	self.tiles = {}
 	self.tileset = love.graphics.newImage('res/tiles/tileset_dungeon.png')
-	self.wall = love.graphics.newQuad(0, 0, 15, 15, self.tileset:getWidth(), self.tileset:getHeight())
+	self.wall = love.graphics.newQuad(15, 0, 15, 17, self.tileset:getWidth(), self.tileset:getHeight())
 	self.floor = love.graphics.newQuad(0, 15, 15, 15, self.tileset:getWidth(), self.tileset:getHeight())
 
 	-- build map
@@ -96,7 +96,7 @@ function Map:draw()
 		local y = y - 1
 		if value == 1 then
 			love.graphics.draw(self.tileset, self.floor, x * 15, y * 15)
-			love.graphics.draw(self.tileset, self.wall, x * 15, y * 15)
+			love.graphics.draw(self.tileset, self.wall, x * 15, y * 15 - 2)
 		else
 			love.graphics.draw(self.tileset, self.floor, x * 15, y * 15)
 		end
