@@ -125,12 +125,7 @@ function Map:generateFloorTiles()
 end
 
 function Map:getFloorTiles(x,y)
-	local tileNumber = 1
-	for i=1, x do
-		for j=1, y do
-			tileNumber = tileNumber + 1
-		end
-	end
+	local tileNumber = (y * self.width) + x + 1
 	return floorTiles[tileNumber]
 end
 
