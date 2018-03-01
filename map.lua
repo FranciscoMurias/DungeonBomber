@@ -5,6 +5,8 @@ local Vector = require 'vector'
 
 local Map = Object:extend()
 
+floorTiles = {}
+
 function Map:new()
   self.width = 17
   self.height = 11
@@ -13,8 +15,14 @@ function Map:new()
 	self.tiles = {}
 	self.tileset = love.graphics.newImage('res/tiles/tileset_dungeon.png')
 	self.wall = love.graphics.newQuad(15, 0, 15, 17, self.tileset:getWidth(), self.tileset:getHeight())
-	self.floor = love.graphics.newQuad(0, 15, 15, 15, self.tileset:getWidth(), self.tileset:getHeight())
-
+	self.floors = {
+		love.graphics.newQuad(0, 0, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
+		love.graphics.newQuad(0, 15, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
+		love.graphics.newQuad(0, 30, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
+		love.graphics.newQuad(0, 45, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
+	}
+	-- make random floor pattern
+	self:generateFloorTiles()
 	-- build map
 	self:generateLayout()
 end
@@ -87,6 +95,34 @@ function Map:foreach(fn)
 	end
 end
 
+function Map:generateFloorTiles()
+math.randomseed( os.time() )
+	for i=1, self.width do
+		for j=1, self.height do
+			local chosenTile = math.random(1,4)
+			table.insert(floorTiles, chosenTile)
+			--if chance < 0.7 then
+			--local softObject = SoftObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
+		--elseif value == 1 then
+		--	local wall = {
+		--		position = Vector(x * 15, y * 15),
+		--		width = 15,
+		--		height = 15,
+		--	}
+		end
+	end
+end
+
+function Map:getFloorTiles(x,y)
+	local tileNumber = 1
+		for i=1, x do
+			for j=1, y do
+				tileNumber = tileNumber + 1
+			end
+		end
+	return floorTiles[tileNumber]
+end
+
 function Map:update(dt)
 end
 
@@ -95,10 +131,10 @@ function Map:draw()
 		local x = x - 1
 		local y = y - 1
 		if value == 1 then
-			love.graphics.draw(self.tileset, self.floor, x * 15, y * 15)
+			love.graphics.draw(self.tileset, self.floors[self:getFloorTiles(x,y)], x * 15, y * 15)
 			love.graphics.draw(self.tileset, self.wall, x * 15, y * 15 - 2)
 		else
-			love.graphics.draw(self.tileset, self.floor, x * 15, y * 15)
+			love.graphics.draw(self.tileset, self.floors[self:getFloorTiles(x,y)], x * 15, y * 15)
 		end
 	end)
 end
