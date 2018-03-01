@@ -19,7 +19,7 @@ function love.load() -----------------------------------------------------------
 
 	map = Map()
 
-	player = Player(3, 6)
+	player = Player(3 + 15, 6 + 15)
 	objects = {player}
 
 	math.randomseed( os.time() )
@@ -29,7 +29,7 @@ function love.load() -----------------------------------------------------------
 			local softObject = SoftObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
 			table.insert(objects, softObject)
 			world:add(softObject, softObject.position.x, softObject.position.y, softObject.width, softObject.height)
-		elseif value == 1 then
+		elseif value == 1  or value == -2 then
 			local x = x - 1
 			local y = y - 1
 			local wall = {
@@ -65,8 +65,7 @@ function love.draw() -----------------------------------------------------------
 
 	love.graphics.setCanvas(arena)
 	love.graphics.clear()
-
-	map:draw(0, 0)
+	map:drawWalls(0, 0)
 
 	for _, object in ipairs(objects) do
 		object:draw()
@@ -82,13 +81,14 @@ function love.draw() -----------------------------------------------------------
 	love.graphics.setCanvas()
 
 	love.graphics.setCanvas(background)
+	map:drawFloor(53 - 15, 19 - 15)
 	love.graphics.draw(map.background)
-	love.graphics.draw(arena, 53, 19, 0, 1, 1, 0, 0)
 	love.graphics.setCanvas()
 
 	screen:apply()
 	love.graphics.scale(scale)
 	love.graphics.draw(background, 0, 0, 0, 1, 1, 0, 0)
+	love.graphics.draw(arena, 53 - 15, 19 - 15, 0, 1, 1, 0, 0)
 end
 
 function love.keypressed(key)
