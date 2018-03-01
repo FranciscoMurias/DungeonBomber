@@ -13,7 +13,7 @@ function SoftObject:new(x, y, variant)
   self.state = 1
   self.variant = variant
   self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
-	self.destroyed = false
+  self.destroyed = false
 
     self.sprite:addAnimation('intact', {
 		image        = love.graphics.newImage 'res/tiles/softObjects.png',

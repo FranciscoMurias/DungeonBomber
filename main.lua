@@ -50,8 +50,7 @@ end
 function love.update(dt) ------------------------------------------------------------------------------------
 	map:update(dt)
 	screen:update(dt)
-	--screen:setShake(2)
-
+	
 	for _, object in ipairs(objects) do
 		object:update(dt)
 	end
@@ -95,5 +94,6 @@ function love.keypressed(key)
 		local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
 		local bomb = Bomb(x, y)
 		table.insert(objects, bomb)
+		-- world:add(bomb, x, y, 15, 15) -- need to check if player is present on tile and only call after that is false
 	end
 end

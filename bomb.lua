@@ -1,6 +1,6 @@
 local Object = require 'lib.classic.classic'
 local sodapop = require "lib/sodapop"
-
+local screen = require "lib/shack/shack"
 local Vector = require 'vector'
 local SoftObject = require 'softObject'
 
@@ -12,11 +12,13 @@ function Bomb:new(x, y)
   self.height = 15
   self.origin = Vector(5, 2)
 
-	self.duration = 2
+	self.fuseDuration = 2.3
+	self.explosionDuration = self.fuseDuration + 0.6
 	self.timer = 0
 	self.exploded = false
-	self.radius = 2
-
+	self.radius = 1
+	
+	self.numExplosions = 0
 	self.explosions = {}
 
 	self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
@@ -36,9 +38,10 @@ end
 
 function Bomb:update(dt)
 	if self.exploded then
+
 		return
 	end
-	if self.timer > self.duration then
+	if self.timer > self.fuseDuration then
 		self:check(self.position.x, self.position.y)
 		local directions = {
 			[Vector(0, 1)] = true,
@@ -60,11 +63,19 @@ function Bomb:update(dt)
 								width = 15,
 								height = 15,
 							})
+						self.numExplosions = self.numExplosions + 1
 					end
 				end
 			end
 		end
 		self.exploded = true
+		if self.timer < self.explosionDuration then
+			screen:setShake(3)
+		end
+
+		--for i=0, self.numExplosions do
+		--	table.remove(self.explosions, i) -- something's not right here
+		--end
 	end
 
 	self.sprite:update(dt)
@@ -72,13 +83,15 @@ function Bomb:update(dt)
 end
 
 function Bomb:draw()
-	self.sprite:draw()
-	for _, exp in ipairs(self.explosions) do
-		love.graphics.rectangle('fill', exp.x, exp.y, exp.width, exp.height)
+	if self.exploded == false then self.sprite:draw()
+	else 
+		for _, exp in ipairs(self.explosions) do
+			love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
+		end
+		love.graphics.setColor(255, 0, 0, 255)
+		love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
+		love.graphics.setColor(255, 255, 255, 255)
 	end
-	love.graphics.setColor(255, 0, 0, 255)
-	love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
-	love.graphics.setColor(255, 255, 255, 255)
 end
 
 function Bomb:check(x, y)
@@ -89,6 +102,8 @@ function Bomb:check(x, y)
 			hitWall = true
 		elseif item:is(SoftObject) then
 			item.destroyed = true
+			-- on triggering 'destroyed' to true, call a function that spawns debris particles in the item location and applies random force
+			world:remove(item)
 		end
 	end
 	return hitWall
