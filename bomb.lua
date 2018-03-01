@@ -10,7 +10,7 @@ function Bomb:new(x, y)
   self.position = Vector(x, y)
   self.width = 15
   self.height = 15
-  self.origin = Vector(5, 0)
+  self.origin = Vector(0, -2)
 
 	self.fuseDuration = 2.3
 	self.explosionDuration = self.fuseDuration + 0.6
@@ -64,11 +64,10 @@ function Bomb:update(dt)
 			for direction, spreading in pairs(directions) do
 				if spreading then
 					local tile = self.position + (direction * i * 15)
-					local hitWall = self:check(tile.x, tile.y)
-					if hitWall then
+					local hit = self:check(tile.x, tile.y)
+					if hit then
 						directions[direction] = false
 					else
-						-- check for colision with softobject and only explode the first softobject tile, not all of them ones in the radius
 						table.insert(self.explosions, {
 								x = tile.x,
 								y = tile.y,
@@ -96,31 +95,32 @@ function Bomb:update(dt)
 end
 
 function Bomb:draw()
-	if self.exploded == false then self.sprite:draw()
+	if self.exploded == false then self.sprite:draw(self.origin.x, self.origin.y)
 	else 
 		for _, exp in ipairs(self.explosions) do
 			self.explosionSprite:draw(math.random(0,3),math.random(0,3)) -- add subsequent explosions here.. later with a time delay
-			love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
+				love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
 		end
 		self.explosionSprite:draw(math.random(0,3),math.random(0,3))
-		love.graphics.setColor(255, 0, 0, 255)
-		love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
-		love.graphics.setColor(255, 255, 255, 255)
+			love.graphics.setColor(255, 0, 0, 255)
+			love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
+			love.graphics.setColor(255, 255, 255, 255)
 	end
 end
 
 function Bomb:check(x, y)
-	local hitWall = false
+	local hit = false
 	local items, _ = world:queryRect(x, y, self.width, self.height)
 	for _, item in ipairs(items) do
 		if not item.is then
-			hitWall = true
+			hit = true
 		elseif item:is(SoftObject) then
 			item.destroyed = true
 			item:SpawnPowerUp()
 			-- on triggering 'destroyed' to true:
 			-- call a function that spawns debris particles in the item location and applies random force
 			world:remove(item)
+			hit = true
 		end
 	end
 	return hitWall

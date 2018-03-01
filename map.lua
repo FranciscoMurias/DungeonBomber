@@ -138,7 +138,6 @@ function Map:draw()
 			love.graphics.draw(self.tileset, self.floors[self:getFloorTiles(x,y)], x * 15, y * 15)
 		end
 	end)
-	love.graphics.draw(self.background)
 end
 
 return Map

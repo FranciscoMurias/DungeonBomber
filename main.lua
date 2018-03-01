@@ -44,7 +44,8 @@ function love.load() -----------------------------------------------------------
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
 
 	scale = 4.0
-	canvas = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
+	background = love.graphics.newCanvas(width, height)
+	arena = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
 end
 
 function love.update(dt) ------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ function love.draw() -----------------------------------------------------------
 		return a.position.y + a.height < b.position.y + b.height
 	end)
 
-	love.graphics.setCanvas(canvas)
+	love.graphics.setCanvas(arena)
 	love.graphics.clear()
 
 	map:draw(0, 0)
@@ -79,10 +80,15 @@ function love.draw() -----------------------------------------------------------
 	end
 
 	love.graphics.setCanvas()
-	love.graphics.scale(scale)
+
+	love.graphics.setCanvas(background)
+	love.graphics.draw(map.background)
+	love.graphics.draw(arena, 53, 19, 0, 1, 1, 0, 0)
+	love.graphics.setCanvas()
 
 	screen:apply()
-	love.graphics.draw(canvas, 0, 0, 0, 1, 1, 0, 0)
+	love.graphics.scale(scale)
+	love.graphics.draw(background, 0, 0, 0, 1, 1, 0, 0)
 end
 
 function love.keypressed(key)
