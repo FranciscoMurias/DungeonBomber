@@ -81,7 +81,7 @@ function Bomb:update(dt)
 		end
 		self.exploded = true
 		if self.timer < self.explosionDuration then
-			screen:setShake(3)
+			screen:setShake(10)
 		end
 		--if self.timer > self.explosionDuration then
 			--for i=0, self.numExplosions do
@@ -99,12 +99,12 @@ function Bomb:draw()
 	else 
 		for _, exp in ipairs(self.explosions) do
 			self.explosionSprite:draw(math.random(0,3),math.random(0,3)) -- add subsequent explosions here.. later with a time delay
-				love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
+				-- love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
 		end
 		self.explosionSprite:draw(math.random(0,3),math.random(0,3))
-			love.graphics.setColor(255, 0, 0, 255)
-			love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
-			love.graphics.setColor(255, 255, 255, 255)
+			-- love.graphics.setColor(255, 0, 0, 255)
+			-- love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
+			-- love.graphics.setColor(255, 255, 255, 255)
 	end
 end
 
