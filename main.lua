@@ -82,7 +82,7 @@ function love.draw() -----------------------------------------------------------
 	love.graphics.scale(scale)
 
 	screen:apply()
-	love.graphics.draw(canvas, 0, 0, 0, 1, 1, -53, -18)
+	love.graphics.draw(canvas, 0, 0, 0, 1, 1, 0, 0)
 end
 
 function love.keypressed(key)

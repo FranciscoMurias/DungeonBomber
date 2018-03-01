@@ -12,6 +12,7 @@ function Map:new()
   self.height = 11
 	self.tilewidth = 15
 	self.tileheight = 15
+	self.background = love.graphics.newImage 'res/tiles/BGArena1.png'
 	self.tiles = {}
 	self.tileset = love.graphics.newImage('res/tiles/tileset_dungeon.png')
 	self.wall = love.graphics.newQuad(15, 0, 15, 17, self.tileset:getWidth(), self.tileset:getHeight())
@@ -137,6 +138,7 @@ function Map:draw()
 			love.graphics.draw(self.tileset, self.floors[self:getFloorTiles(x,y)], x * 15, y * 15)
 		end
 	end)
+	love.graphics.draw(self.background)
 end
 
 return Map
