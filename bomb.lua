@@ -10,7 +10,7 @@ function Bomb:new(x, y)
   self.position = Vector(x, y)
   self.width = 15
   self.height = 15
-  self.origin = Vector(5, 2)
+  self.origin = Vector(5, 0)
 
 	self.fuseDuration = 2.3
 	self.explosionDuration = self.fuseDuration + 0.6
