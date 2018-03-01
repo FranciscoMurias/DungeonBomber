@@ -55,7 +55,7 @@ end
 function SoftObject:SpawnPowerUp()
 	local chance = math.random()
 	if chance < 0.25 then
-		local powerUp = PowerUp(self.position.x , self.position.y , math.random(1,2))
+		local powerUp = PowerUp(self.position.x , self.position.y , math.random(1,4))
 		table.insert(objects, powerUp)
 		-- world:add(powerUp, powerUp.position.x, powerUp.position.y, powerUp.width, powerUp.height) -- colide player to pick up powerup?
 	return
