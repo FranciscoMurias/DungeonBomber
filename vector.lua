@@ -44,7 +44,7 @@ function Vector:__sub(v)
 end
 
 -- multiply a vector by a scalar value
-function Vector:__mult(s)
+function Vector:__mul(s)
   return Vector(self.x * s, self.y * s)
 end
 

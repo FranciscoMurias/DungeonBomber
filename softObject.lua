@@ -3,18 +3,19 @@ local sodapop = require "lib/sodapop"
 
 local Vector = require 'vector'
 
-local softObject = Object:extend()
+local SoftObject = Object:extend()
 
-function softObject:new(x, y, variant)
+function SoftObject:new(x, y, variant)
   self.position = Vector(x, y)
   self.width = 15
   self.height = 15
   self.origin = Vector(0, -2)
   self.state = 1
   self.variant = variant
-  self.softObjectSprite = sodapop.newAnimatedSprite(self:center():unpack())
+  self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
+	self.destroyed = false
 
-    self.softObjectSprite:addAnimation('intact', {
+    self.sprite:addAnimation('intact', {
 		image        = love.graphics.newImage 'res/tiles/softObjects.png',
 		frameWidth  = 15,
 		frameHeight = 17,
@@ -22,7 +23,7 @@ function softObject:new(x, y, variant)
 			{1, variant, 1, variant, .3},
 		},
 	})
-	self.softObjectSprite:addAnimation('destroyed', {
+	self.sprite:addAnimation('destroyed', {
 		image       = love.graphics.newImage 'res/tiles/softObjects.png',
 		frameWidth  = 15,
 		frameHeight = 17,
@@ -32,16 +33,22 @@ function softObject:new(x, y, variant)
 	})
 end
 
-function softObject:center()
+function SoftObject:center()
 	return self.position + Vector(self.width / 2, self.height / 2)
 end
 
-function softObject:update(dt)
-	self.softObjectSprite:update(dt)
+function SoftObject:update(dt)
+	if self.destroyed then
+		return
+	end
+	self.sprite:update(dt)
 end
 
-function softObject:draw()
-	self.softObjectSprite:draw(self.origin.x, self.origin.y)
+function SoftObject:draw()
+	if self.destroyed then
+		return
+	end
+	self.sprite:draw(self.origin.x, self.origin.y)
 end
 
-return softObject
+return SoftObject

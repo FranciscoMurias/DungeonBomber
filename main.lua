@@ -4,7 +4,7 @@ local screen = require "lib/shack/shack"
 local Vector = require 'vector'
 local Player = require 'player'
 local Bomb = require 'bomb'
-local softObject = require 'softObject'
+local SoftObject = require 'softObject'
 local Map = require 'map'
 
 love.graphics.setDefaultFilter("nearest", "nearest")
@@ -26,7 +26,7 @@ function love.load() -----------------------------------------------------------
 	map:foreach(function(x, y, value)
 		local chance = math.random()
 		if value == 0 and chance < 0.7 then
-			local softObject = softObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
+			local softObject = SoftObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
 			table.insert(objects, softObject)
 			world:add(softObject, softObject.position.x, softObject.position.y, softObject.width, softObject.height)
 		elseif value == 1 then
@@ -93,7 +93,7 @@ function love.keypressed(key)
 		debug = not debug
 	elseif key == 'x' then
 		local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
-		local bomb = Bomb(x, y-2)
+		local bomb = Bomb(x, y)
 		table.insert(objects, bomb)
 	end
 end
