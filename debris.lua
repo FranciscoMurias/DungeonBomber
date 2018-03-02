@@ -4,23 +4,49 @@ local Vector = require 'vector'
 local Debris = Object:extend()
 
 -- particle stuff --
-function Debris:new()
-    self.particleImg = love.graphics.newImage('res/sprites/debris_particles.png')
-    self.psystem = love.graphics.newParticleSystem(self.particleImg, 32)
-    self.psystem:setParticleLifetime(0.5, 1.5) -- Particles live at least 2s and at most 5s.
-    self.psystem:setEmissionRate(5)
-    self.psystem:setSizeVariation(1)
-    self.psystem:setLinearAcceleration(-20, -20, 20, 20) -- Random movement in all directions.
-    self.psystem:setColors(255, 255, 255, 255, 255, 255, 255, 0) -- Fade to transparency.
+function Debris:new(x, y)
+	self.position = Vector(x, y)
+	self.width = 12
+	self.height = 9
+
+	self.particleImg = love.graphics.newImage('res/sprites/debris_particles.png')
+
+	self.quads = {}
+	for j = 0, 3 do
+		for i = 0, 6 do
+			local quad = love.graphics.newQuad(i * 3, j * 6, 3, 6, self.particleImg:getDimensions())
+			table.insert(self.quads, quad)
+		end
+	end
+
+	self.textures = {}
+	for i = 1, 5 do
+		local q = self.quads[math.random(1, #self.quads)]
+		local c = love.graphics.newCanvas(3, 6)
+		love.graphics.setCanvas(c)
+		love.graphics.draw(self.particleImg, q, 0, 0)
+		love.graphics.setCanvas()
+		local p = {
+			texture = c,
+			x = math.random(self.position.x, self.position.x + self.width),
+			y = math.random(self.position.y, self.position.y + self.height),
+			r = math.random() * math.pi,
+		}
+		table.insert(self.textures, p)
+	end
+
 end
    
 function Debris:update(dt)
-	self.psystem:update(dt)
 end
 
 function Debris:draw()
-	-- Draw the particle system at the center of the game window.
-	love.graphics.draw(self.psystem, love.graphics.getWidth() * 0.5, love.graphics.getHeight() * 0.5)
+	for _, p in ipairs(self.textures) do
+		love.graphics.setColor(20, 0, 60, 100)
+		love.graphics.draw(p.texture, p.x, p.y + 2, p.r)
+		love.graphics.setColor(255, 255, 255, 255)
+		love.graphics.draw(p.texture, p.x, p.y, p.r)
+	end
 end
 
 return Debris

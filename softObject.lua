@@ -59,15 +59,12 @@ function SoftObject:SpawnPowerUp()
 		local powerUp = PowerUp(self.position.x , self.position.y , math.random(1,4))
 		table.insert(objects, powerUp)
 		-- world:add(powerUp, powerUp.position.x, powerUp.position.y, powerUp.width, powerUp.height) -- colide player to pick up powerup?
-	return
 	end
 end
 
 function SoftObject:DebrisDestruction()
-	-- local numParticles = math.random(8,15)
-	local debris = Debris()
-	--table.insert(objects, debris)
-	return
+	local debris = Debris(self.position.x, self.position.y)
+	table.insert(objects, debris)
 end
 
 return SoftObject

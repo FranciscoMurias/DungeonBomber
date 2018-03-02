@@ -16,9 +16,9 @@ function Bomb:new(x, y)
 	self.explosionDuration = self.fuseDuration + 0.6
 	self.timer = 0
 	self.exploded = false
-	self.radius = 10
+	self.explosionTimer = 0
+	self.radius = 2
 	
-	self.numExplosions = 0
 	self.explosions = {}
 
 	self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
@@ -30,17 +30,6 @@ function Bomb:new(x, y)
 			{1, 1, 4, 1, .2},
 		},
 	})
-
-	self.explosionSprite = sodapop.newAnimatedSprite(self:center():unpack())
-	self.explosionSprite:addAnimation('explode1', {
-		image	= love.graphics.newImage('res/sprites/explosion1.png'),
-		frameWidth = 47,
-		frameHeight = 39,
-		frames = {
-			{1, 1, 16, 1, .04},
-		},
-		stopAtEnd    = true
-	})
 end
 
 function Bomb:center()
@@ -48,12 +37,20 @@ function Bomb:center()
 end
 
 function Bomb:update(dt)
+	-- world:add(bomb, x, y, 15, 15) -- need to check if player is present on tile and only call after that is false and remove colider once exploded
 	if self.exploded then
-		self.explosionSprite:update(dt)
+		for _, explosionSprite in ipairs(self.explosions) do
+			explosionSprite:update(dt)
+			if not explosionSprite.playing and self.explosionTimer > explosionSprite.delay then
+				explosionSprite.playing = true
+			end
+		end
+		self.explosionTimer = self.explosionTimer + dt
 		return
 	end
 	if self.timer > self.fuseDuration then
 		self:check(self.position.x, self.position.y)
+		self:addExplosion(self.position.x + 7, self.position.y + 7, 0)
 		local directions = {
 			[Vector(0, 1)] = true,
 			[Vector(0, -1)] = true,
@@ -67,14 +64,11 @@ function Bomb:update(dt)
 					local hit = self:check(tile.x, tile.y)
 					if hit then
 						directions[direction] = false
+						if hit == 2 then
+							self:addExplosion(tile.x + 7, tile.y + 7, i / 20)
+						end
 					else
-						table.insert(self.explosions, {
-								x = tile.x,
-								y = tile.y,
-								width = 15,
-								height = 15,
-							})
-						self.numExplosions = self.numExplosions + 1
+						self:addExplosion(tile.x + 7, tile.y + 7, i / 20)
 					end
 				end
 			end
@@ -83,11 +77,6 @@ function Bomb:update(dt)
 		if self.timer < self.explosionDuration then
 			screen:setShake(10)
 		end
-		--if self.timer > self.explosionDuration then
-			--for i=0, self.numExplosions do
-			--	table.remove(self.explosions, i) -- something's not right here
-			--end
-		--end
 	end
 
 	self.sprite:update(dt)
@@ -95,34 +84,52 @@ function Bomb:update(dt)
 end
 
 function Bomb:draw()
-	if self.exploded == false then self.sprite:draw(self.origin.x, self.origin.y)
+	if self.exploded == false then
+		self.sprite:draw(self.origin.x, self.origin.y)
 	else 
-		for _, exp in ipairs(self.explosions) do
-			self.explosionSprite:draw(math.random(0,3),math.random(0,3)) -- add subsequent explosions here.. later with a time delay
-				-- love.graphics.rectangle('line', exp.x, exp.y, exp.width, exp.height)
+		for _, explosionSprite in ipairs(self.explosions) do
+			if explosionSprite.playing then
+				explosionSprite:draw()
+			end
 		end
-		self.explosionSprite:draw(math.random(0,3),math.random(0,3))
-			-- love.graphics.setColor(255, 0, 0, 255)
-			-- love.graphics.rectangle('line', self.position.x, self.position.y, self.width, self.height)
-			-- love.graphics.setColor(255, 255, 255, 255)
 	end
 end
 
 function Bomb:check(x, y)
-	local hit = false
+	local hit = nil
 	local items, _ = world:queryRect(x, y, self.width, self.height)
 	for _, item in ipairs(items) do
 		if not item.is then
-			hit = true
+			hit = 1
 		elseif item:is(SoftObject) then
 			item.destroyed = true
 			item:SpawnPowerUp()
 			item:DebrisDestruction()
 			world:remove(item)
-			hit = true
+			hit = 2
 		end
 	end
-	return hitWall
+	return hit
+end
+
+function Bomb:addExplosion(x, y, delay)
+	local explosionSprite = sodapop.newAnimatedSprite(
+			x + math.random(-3, 3),
+			y + math.random(-3, 3)
+		)
+	explosionSprite:addAnimation('explode1', {
+		image	= love.graphics.newImage('res/sprites/explosion1.png'),
+		frameWidth = 47,
+		frameHeight = 39,
+		frames = {
+			{1, 1, 16, 1, .04},
+		},
+		stopAtEnd    = true
+	})
+	playing = math.random(0, 1)
+	explosionSprite.delay = delay
+	explosionSprite.playing = false
+	table.insert(self.explosions, explosionSprite)
 end
 
 return Bomb
