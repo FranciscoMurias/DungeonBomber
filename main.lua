@@ -51,6 +51,17 @@ end
 function love.update(dt) ------------------------------------------------------------------------------------
 	map:update(dt)
 	screen:update(dt)
+
+	local toRemove = {}
+	for i, object in ipairs(objects) do
+		if object.remove then
+			table.insert(toRemove, i)
+		end
+	end
+	for i = #toRemove, 1, -1 do
+		local index = toRemove[i]
+		table.remove(objects, index)
+	end
 	
 	for _, object in ipairs(objects) do
 		object:update(dt)

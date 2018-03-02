@@ -2,6 +2,7 @@ local Object = require 'lib.classic.classic'
 local anim8 = require 'lib.anim8'
 
 local Vector = require 'vector'
+local PowerUp = require 'powerUp'
 
 local Player = Object:extend()
 
@@ -58,8 +59,26 @@ function Player:update(dt)
 
 	if velocity ~= Vector(0, 0) then
 		local newPosition = self.position + velocity
-		local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y)
+		local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y,
+			function(item, other)
+				if not other.is then
+					return 'slide'
+				elseif other:is(PowerUp) then
+					return 'cross'
+				else
+					return 'slide'
+				end
+			end
+		)
 		self.position = Vector(actualX, actualY)
+
+		-- handle collisions
+		for _, col in ipairs(cols) do
+			local other = col.other
+			if other.is and other:is(PowerUp) then
+				other.remove = true
+			end
+		end
 
 		-- animation control
 		local normalized = velocity:normalize()
