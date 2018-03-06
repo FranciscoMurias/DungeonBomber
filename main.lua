@@ -62,7 +62,7 @@ function love.update(dt) -------------------------------------------------------
 		local index = toRemove[i]
 		table.remove(objects, index)
 	end
-	
+
 	for _, object in ipairs(objects) do
 		object:update(dt)
 	end
@@ -111,7 +111,7 @@ function love.keypressed(key)
 		debug = not debug
 	elseif key == 'x' then
 		local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
-		local bomb = Bomb(x, y)
+		local bomb = Bomb(player, x, y)
 		table.insert(objects, bomb)
 	end
 end

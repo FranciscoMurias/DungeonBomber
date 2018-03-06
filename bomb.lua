@@ -6,7 +6,8 @@ local SoftObject = require 'softObject'
 
 local Bomb = Object:extend()
 
-function Bomb:new(x, y)
+function Bomb:new(player, x, y)
+	self.player = player
   self.position = Vector(x, y)
   self.width = 15
   self.height = 15
@@ -18,7 +19,8 @@ function Bomb:new(x, y)
 	self.exploded = false
 	self.explosionTimer = 0
 	self.radius = 2
-	
+	self.underPlayer = true
+
 	self.explosions = {}
 
 	self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
@@ -30,6 +32,8 @@ function Bomb:new(x, y)
 			{1, 1, 4, 1, .2},
 		},
 	})
+
+	world:add(self, self.position.x, self.position.y, self.width, self.height)
 end
 
 function Bomb:center()
@@ -37,7 +41,20 @@ function Bomb:center()
 end
 
 function Bomb:update(dt)
-	-- world:add(bomb, x, y, 15, 15) -- need to check if player is present on tile and only call after that is false and remove colider once exploded
+	print(self.underPlayer)
+	if self.underPlayer then
+		local colliding = false
+		local items, _ = world:queryRect(self.position.x, self.position.y, self.width, self.height)
+		for _, item in ipairs(items) do
+			if item == self.player then
+				colliding = true
+			end
+		end
+		if not colliding then
+			self.underPlayer = false
+		end
+	end
+
 	if self.exploded then
 		for _, explosionSprite in ipairs(self.explosions) do
 			explosionSprite:update(dt)
@@ -48,6 +65,7 @@ function Bomb:update(dt)
 		self.explosionTimer = self.explosionTimer + dt
 		return
 	end
+
 	if self.timer > self.fuseDuration then
 		self:check(self.position.x, self.position.y)
 		self:addExplosion(self.position.x + 7, self.position.y + 7, 0)
@@ -74,6 +92,7 @@ function Bomb:update(dt)
 			end
 		end
 		self.exploded = true
+		world:remove(self)
 		if self.timer < self.explosionDuration then
 			screen:setShake(10)
 		end
@@ -86,7 +105,7 @@ end
 function Bomb:draw()
 	if self.exploded == false then
 		self.sprite:draw(self.origin.x, self.origin.y)
-	else 
+	else
 		for _, explosionSprite in ipairs(self.explosions) do
 			if explosionSprite.playing then
 				explosionSprite:draw()

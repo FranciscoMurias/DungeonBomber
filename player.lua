@@ -3,6 +3,7 @@ local anim8 = require 'lib.anim8'
 
 local Vector = require 'vector'
 local PowerUp = require 'powerUp'
+local Bomb = require 'bomb'
 
 local Player = Object:extend()
 
@@ -65,6 +66,12 @@ function Player:update(dt)
 					return 'slide'
 				elseif other:is(PowerUp) then
 					return 'cross'
+				elseif other:is(Bomb) and other.player == self then
+					if other.underPlayer then
+						return 'cross'
+					else
+						return 'slide'
+					end
 				else
 					return 'slide'
 				end
