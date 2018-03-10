@@ -13,7 +13,7 @@ function PowerUp:new(x, y, variant)
   self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
   self.burned = false
 
-    self.sprite:addAnimation('intact', {
+  self.sprite:addAnimation('intact', {
 		image        = love.graphics.newImage 'res/sprites/powerUps.png',
 		frameWidth  = 15,
 		frameHeight = 16,
@@ -37,7 +37,7 @@ end
 
 function PowerUp:update(dt)
 	if self.burned then
-		
+
 		return
 	end
 	self.sprite:update(dt)

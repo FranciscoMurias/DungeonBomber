@@ -41,7 +41,6 @@ function Bomb:center()
 end
 
 function Bomb:update(dt)
-	print(self.underPlayer)
 	if self.underPlayer then
 		local colliding = false
 		local items, _ = world:queryRect(self.position.x, self.position.y, self.width, self.height)
@@ -96,6 +95,7 @@ function Bomb:update(dt)
 		if self.timer < self.explosionDuration then
 			screen:setShake(10)
 		end
+		self.player.usedBombs = self.player.usedBombs - 1
 	end
 
 	self.sprite:update(dt)
