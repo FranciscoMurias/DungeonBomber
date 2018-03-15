@@ -115,6 +115,7 @@ function Bomb:draw()
 end
 
 function Bomb:check(x, y)
+	local Player = require 'player'
 	local hit = nil
 	local items, _ = world:queryRect(x, y, self.width, self.height)
 	for _, item in ipairs(items) do
@@ -126,6 +127,9 @@ function Bomb:check(x, y)
 			item:DebrisDestruction()
 			world:remove(item)
 			hit = 2
+		elseif item:is(Player) then
+			item.remove = true
+			world:remove(item)
 		end
 	end
 	return hit
