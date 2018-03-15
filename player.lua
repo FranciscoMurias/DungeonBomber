@@ -16,6 +16,7 @@ function Player:new(x, y)
 	self.speed = 50
 	self.maxBombs = 1
 	self.usedBombs = 0
+	self.bombRadius = 1
 	self.powerUps = {}
 	self.sprite = love.graphics.newImage('res/sprites/player_sprites.png')
 	self.grid = anim8.newGrid(15, 19, self.sprite:getWidth(), self.sprite:getHeight())
@@ -87,11 +88,9 @@ function Player:update(dt)
 			local other = col.other
 			if other.is and other:is(PowerUp) then
 				other.remove = true
-				-- just testing, need to add power types later, but
-				-- for now, they'll all be bomb# powerups
 				if not self.powerUps[other] then
 					self.powerUps[other] = other
-					self.maxBombs = self.maxBombs + 1
+					other.addEffect(player)
 				end
 			end
 		end

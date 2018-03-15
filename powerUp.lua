@@ -4,6 +4,24 @@ local Vector = require 'vector'
 
 local PowerUp = Object:extend()
 
+local effects = {
+	-- bomb
+	function(player)
+		player.maxBombs = player.maxBombs + 1
+	end,
+	-- fire potion
+	function(player)
+		player.bombRadius = player.bombRadius + 1
+	end,
+	-- boots
+	function(player)
+		player.speed = 75
+	end,
+	-- glove
+	function(player)
+	end,
+}
+
 function PowerUp:new(x, y, variant)
   self.position = Vector(x, y)
   self.width = 15
@@ -12,6 +30,9 @@ function PowerUp:new(x, y, variant)
   self.variant = variant
   self.sprite = sodapop.newAnimatedSprite(self:center():unpack())
   self.burned = false
+
+	-- set function define effect on player
+	self.addEffect = effects[variant]
 
   self.sprite:addAnimation('intact', {
 		image        = love.graphics.newImage 'res/sprites/powerUps.png',

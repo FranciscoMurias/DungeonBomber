@@ -18,7 +18,7 @@ function Bomb:new(player, x, y)
 	self.timer = 0
 	self.exploded = false
 	self.explosionTimer = 0
-	self.radius = 2
+	self.radius = player.bombRadius
 	self.underPlayer = true
 
 	self.explosions = {}
