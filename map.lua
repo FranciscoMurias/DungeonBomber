@@ -7,6 +7,9 @@ local Map = Object:extend()
 
 floorTiles = {}
 
+Map.WALL = 1
+Map.OUTER_WALL = -2
+
 function Map:new()
   self.width = 19
   self.height = 13
@@ -99,10 +102,24 @@ function Map:generateLayout()
 	end
 end
 
-function Map:toTile(x, y)
-	x = math.floor(x / 15) * 15
-	y = math.floor(y / 15) * 15
-	return x, y
+function Map:toTile(position)
+	local x = position.x
+	local y = position.y
+	x = math.floor(x / 15) + 1
+	y = math.floor(y / 15) + 1
+	return Vector(x, y)
+end
+
+function Map:toWorld(tile)
+	local x = tile.x - 1
+	local y = tile.y - 1
+	return Vector(x * 15, y * 15)
+end
+
+function Map:distance(tile, targetTile)
+	local distanceX = math.abs(tile.x - targetTile.x)
+	local distanceY = math.abs(tile.y - targetTile.y)
+	return distanceX + distanceY
 end
 
 function Map:foreach(fn)

@@ -116,10 +116,12 @@ end
 
 function Bomb:check(x, y)
 	local Player = require 'player'
+	local Enemy = require 'enemy'
+	local Wall = require 'wall'
 	local hit = nil
 	local items, _ = world:queryRect(x, y, self.width, self.height)
 	for _, item in ipairs(items) do
-		if not item.is then
+		if item:is(Wall) then
 			hit = 1
 		elseif item:is(SoftObject) then
 			item.destroyed = true
@@ -127,12 +129,45 @@ function Bomb:check(x, y)
 			item:DebrisDestruction()
 			world:remove(item)
 			hit = 2
-		elseif item:is(Player) then
+		elseif item:is(Player) or item:is(Enemy) then
 			item.remove = true
-			world:remove(item)
 		end
 	end
 	return hit
+end
+
+function Bomb:checkTiles()
+	local Player = require 'player'
+	local Enemy = require 'enemy'
+	local Wall = require 'wall'
+	local collisions = {}
+	local tiles = {self.position}
+	local directions = {Vector(0, 1), Vector(0, -1), Vector(1, 0), Vector(-1, 0)}
+
+	local items, _ = world:queryRect(self.position.x, self.position.y, self.width, self.height)
+	for _, item in ipairs(items) do
+		if item:is(Wall) or item:is(SoftObject) or item:is(Player) or item:is(Enemy) then
+			table.insert(collisions, item)
+			break
+		end
+	end
+
+	for _, dir in ipairs(directions) do
+		for i = 1, self.radius do
+			local hit = false
+			local tile = self.position + (dir * i * 15)
+			local items, _ = world:queryRect(tile.x, tile.y, self.width, self.height)
+			for _, item in ipairs(items) do
+				if item:is(Wall) or item:is(SoftObject) or item:is(Player) or item:is(Enemy) then
+					table.insert(collisions, item)
+					hit = true
+				end
+			end
+			table.insert(tiles, tile)
+			if hit then break end
+		end
+	end
+	return tiles, collisions
 end
 
 function Bomb:addExplosion(x, y, delay)

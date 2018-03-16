@@ -17,6 +17,14 @@ function Vector:length()
   return math.sqrt(math.pow(self.x, 2) + math.pow(self.y, 2))
 end
 
+function Vector:distanceTo(v)
+  return (self - v):length()
+end
+
+function Vector:directionTo(v)
+  return (self - v):normalize()
+end
+
 function Vector:unpack()
   return self.x, self.y
 end
@@ -51,6 +59,10 @@ end
 -- check if two vectors are equal
 function Vector:__eq(v)
   return self.x == v.x and self.y == v.y
+end
+
+function Vector:__tostring()
+  return string.format('Vector: %d, %d', self.x, self.y)
 end
 
 return Vector

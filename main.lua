@@ -3,8 +3,10 @@ local screen = require "lib/shack/shack"
 
 local Vector = require 'vector'
 local Player = require 'player'
+local Enemy = require 'enemy'
 local Bomb = require 'bomb'
 local SoftObject = require 'softObject'
+local Wall = require 'wall'
 local Map = require 'map'
 
 love.graphics.setDefaultFilter("nearest", "nearest")
@@ -19,8 +21,10 @@ function love.load() -----------------------------------------------------------
 
 	map = Map()
 
-	player = Player(3 + 15, 6 + 15)
-	objects = {player}
+	player = Player(15, 15)
+	world:add(player, player.position.x, player.position.y, player.width, player.height)
+	enemy = Enemy(15 * 17, 15)
+	objects = {player, enemy}
 
 	math.randomseed( os.time() )
 	map:foreach(function(x, y, value)
@@ -32,16 +36,10 @@ function love.load() -----------------------------------------------------------
 		elseif value == 1  or value == -2 then
 			local x = x - 1
 			local y = y - 1
-			local wall = {
-				position = Vector(x * 15, y * 15),
-				width = 15,
-				height = 15,
-			}
-			world:add(wall, wall.position.x, wall.position.y, wall.width, wall.height)
+			local wall = Wall(x * 15, y * 15)
+			table.insert(objects, wall)
 		end
 	end)
-
-	world:add(player, player.position.x, player.position.y, player.width, player.height)
 
 	scale = 4.0
 	background = love.graphics.newCanvas(width, height)
@@ -52,19 +50,20 @@ function love.update(dt) -------------------------------------------------------
 	map:update(dt)
 	screen:update(dt)
 
+	for _, object in ipairs(objects) do
+		object:update(dt)
+	end
+
 	local toRemove = {}
 	for i, object in ipairs(objects) do
 		if object.remove then
 			table.insert(toRemove, i)
+			world:remove(object)
 		end
 	end
 	for i = #toRemove, 1, -1 do
 		local index = toRemove[i]
 		table.remove(objects, index)
-	end
-
-	for _, object in ipairs(objects) do
-		object:update(dt)
 	end
 end
 
@@ -111,8 +110,8 @@ function love.keypressed(key)
 		debug = not debug
 	elseif key == 'x' then
 		if player.usedBombs < player.maxBombs then
-			local x, y = map:toTile(player.position.x + 6, player.position.y + 4)
-			local bomb = Bomb(player, x, y)
+			local tile = map:toWorld(map:toTile(player.position + Vector(6, 4)))
+			local bomb = Bomb(player, tile.x, tile.y)
 			table.insert(objects, bomb)
 			player.usedBombs = player.usedBombs + 1
 		end

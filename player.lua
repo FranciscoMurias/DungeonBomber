@@ -14,9 +14,9 @@ function Player:new(x, y)
   self.origin = Vector(2, 6)
   self.direction = Vector(0, 1)
 	self.speed = 50
-	self.maxBombs = 1
+	self.maxBombs = 2
 	self.usedBombs = 0
-	self.bombRadius = 1
+	self.bombRadius = 2
 	self.powerUps = {}
 	self.sprite = love.graphics.newImage('res/sprites/player_sprites.png')
 	self.grid = anim8.newGrid(15, 19, self.sprite:getWidth(), self.sprite:getHeight())
@@ -90,7 +90,7 @@ function Player:update(dt)
 				other.remove = true
 				if not self.powerUps[other] then
 					self.powerUps[other] = other
-					other.addEffect(player)
+					other.addEffect(self)
 				end
 			end
 		end
