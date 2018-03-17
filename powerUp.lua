@@ -15,7 +15,7 @@ local effects = {
 	end,
 	-- boots
 	function(player)
-		player.speed = 75
+		player.speed = player.speed + 10
 	end,
 	-- glove
 	function(player)

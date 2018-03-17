@@ -14,7 +14,7 @@ function Enemy:new(x, y)
 	self.height = 15
 	self.origin = Vector(2, 6)
 	self.direction = Vector(0, 1)
-	self.speed = 50
+	self.speed = 40
 	self.target = self.position
 	self.maxBombs = 1
 	self.usedBombs = 0

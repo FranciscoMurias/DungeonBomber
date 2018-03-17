@@ -13,7 +13,7 @@ function Player:new(x, y)
   self.height = 11
   self.origin = Vector(2, 6)
   self.direction = Vector(0, 1)
-	self.speed = 50
+	self.speed = 40
 	self.maxBombs = 2
 	self.usedBombs = 0
 	self.bombRadius = 2
