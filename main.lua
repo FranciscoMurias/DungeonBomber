@@ -23,8 +23,10 @@ function love.load() -----------------------------------------------------------
 
 	player = Player(15, 15)
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
-	enemy = Enemy(15 * 17, 15)
-	objects = {player, enemy}
+	enemy1 = Enemy(15 * 17, 15 * 11)
+	enemy2 = Enemy(15 * 17, 15)
+	enemy3 = Enemy(15, 15 * 11)
+	objects = {player, enemy1, enemy2, enemy3}
 
 	math.randomseed( os.time() )
 	map:foreach(function(x, y, value)
