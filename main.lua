@@ -14,6 +14,12 @@ love.graphics.setDefaultFilter("nearest", "nearest")
 width, height = love.graphics.getDimensions()
 screen:setDimensions(width, height)
 
+audio = {
+	battleMusic = love.audio.newSource('res/audio/music/BattleSong1.mp3'),
+	explosion = love.audio.newSource('res/audio/sfx/Explosion1.wav', 'static'),
+	collectPowerUp = love.audio.newSource('res/audio/sfx/collectPowerUp.wav', 'static'),
+}
+
 debug = false
 
 function love.load() ----------------------------------------------------------------------------------------
@@ -46,6 +52,8 @@ function love.load() -----------------------------------------------------------
 	scale = 4.0
 	background = love.graphics.newCanvas(width, height)
 	arena = love.graphics.newCanvas(map.width * map.tilewidth, map.height * map.tileheight)
+
+	audio.battleMusic:play()
 end
 
 function love.update(dt) ------------------------------------------------------------------------------------

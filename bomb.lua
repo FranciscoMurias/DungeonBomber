@@ -59,6 +59,8 @@ function Bomb:update(dt)
 			explosionSprite:update(dt)
 			if not explosionSprite.playing and self.explosionTimer > explosionSprite.delay then
 				explosionSprite.playing = true
+				audio.explosion:rewind()
+				audio.explosion:play()
 			end
 		end
 		self.explosionTimer = self.explosionTimer + dt
