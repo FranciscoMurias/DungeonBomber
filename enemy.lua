@@ -14,6 +14,7 @@ function Enemy:new(x, y)
 	self.height = 15
 	self.origin = Vector(2, 6)
 	self.direction = Vector(0, 1)
+	self.animation = 'idleDown'
 	self.speed = 40
 	self.target = self.position
 	self.maxBombs = 1
@@ -248,7 +249,6 @@ function Enemy:update(dt)
 		self:updateIdle(self.direction)
 	end
 
-	print(self.direction)
 
 	self.animations[self.animation]:update(dt)
 end
