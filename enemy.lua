@@ -70,33 +70,13 @@ function isSafe(position)
 end
 
 function Enemy:findPath(target)
-	local Map = require 'map'
-	local targetTile = map:toTile(target)
-	local currentTile = map:toTile(self.position)
-
-	local choice = nil
-	local distance = map:distance(currentTile, targetTile)
-	local neighbors = map:getNeighbors(currentTile:unpack())
-	for _, tile in ipairs(neighbors) do
-		local type = map.tiles[tile.y][tile.x]
-		if not (type == Map.WALL or type == Map.OUTER_WALL) then
-			local newDistance = map:distance(tile, targetTile)
-			if newDistance <= distance then
-				choice = tile
-				distance = newDistance
-			end
+	local filter = function(item)
+		if item:is(PowerUp) then
+			return false
+		else
+			return true
 		end
 	end
-
-	if choice then
-		-- convert back to world position from tile position
-		choice = map:toWorld(choice)
-	end
-
-	return choice
-end
-
-function Enemy:findPathToSafety(target)
 	local Map = require 'map'
 	local targetTile = nil
 	if target then
@@ -110,7 +90,7 @@ function Enemy:findPathToSafety(target)
 	local neighbors = map:getNeighbors(currentTile:unpack())
 	for _, neighbor in ipairs(neighbors) do
 		local position = map:toWorld(neighbor)
-		local items, len = world:queryRect(position.x, position.y, self.width, self.height)
+		local items, len = world:queryRect(position.x, position.y, self.width, self.height, filter)
 		if len == 0 then
 			table.insert(queue, {neighbor})
 		elseif target and items[1]:is(SoftObject) then
@@ -124,7 +104,7 @@ function Enemy:findPathToSafety(target)
 		local position = map:toWorld(node)
 		local safe = isSafe(position)
 		local open = false
-		local _, len = world:queryRect(position.x, position.y, self.width, self.height)
+		local _, len = world:queryRect(position.x, position.y, self.width, self.height, filter)
 		if len == 0 then
 			open = true
 		end
@@ -145,7 +125,7 @@ function Enemy:findPathToSafety(target)
 			for _, neighbor in ipairs(neighbors) do
 				if not seen[tostring(neighbor)] and neighbor ~= currentTile then
 					local position = map:toWorld(neighbor)
-					local items, len = world:queryRect(position.x, position.y, self.width, self.height)
+					local items, len = world:queryRect(position.x, position.y, self.width, self.height, filter)
 					if len == 0 then
 						local newPath = {unpack(path)}
 						table.insert(newPath, neighbor)
@@ -176,7 +156,7 @@ function Enemy:update(dt)
 
 	local safe = isSafe(self.position)
 	if not safe then
-		local path = self:findPathToSafety()
+		local path = self:findPath()
 		if path and #path > 0 then
 			self.target = map:toWorld(path[1])
 			self.currentPath = nil
@@ -190,7 +170,7 @@ function Enemy:update(dt)
 				self.currentIndex = self.currentIndex + 1
 			end
 		elseif not self.target or self.target == self.position then
-			local path = self:findPathToSafety(player.position)
+			local path = self:findPath(player.position)
 			if #path > 0 then
 				local newTarget = map:toWorld(path[1])
 				if newTarget and isSafe(newTarget) then
@@ -274,18 +254,6 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
-	-- for testing, draw enemy target
-	if self.currentPath then
-		for _, target in ipairs(self.currentPath) do
-			target = map:toWorld(target)
-			love.graphics.rectangle('line', target.x, target.y, 15, 15)
-		end
-	end
-	love.graphics.setColor(255, 0, 0, 255)
-	if self.target then
-		love.graphics.rectangle('line', self.target.x, self.target.y, 15, 15)
-	end
-	love.graphics.setColor(255, 255, 255, 255)
 	self.animations[self.animation]:draw(
 		self.sprite, self.position.x, self.position.y, 0, 1, 1, self.origin.x, self.origin.y
 	)
