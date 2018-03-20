@@ -26,6 +26,13 @@ function love.load() -----------------------------------------------------------
 	world = bump.newWorld()
 
 	map = Map()
+	safetyGrid = {}
+	for y = 1, map.height do
+		safetyGrid[y] = {}
+		for x = 1, map.width do
+			safetyGrid[y][x] = 0
+		end
+	end
 
 	player = Player(15, 15)
 	world:add(player, player.position.x, player.position.y, player.width, player.height)
@@ -96,6 +103,7 @@ function love.draw() -----------------------------------------------------------
 			local x, y, w, h = world:getRect(item)
 			love.graphics.rectangle('line', x, y, w, h)
 		end
+		love.graphics.print('FPS: ' .. love.timer.getFPS())
 	end
 
 	love.graphics.setCanvas()

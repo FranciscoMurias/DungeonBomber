@@ -4,6 +4,7 @@ local anim8 = require 'lib.anim8'
 local Vector = require 'vector'
 local PowerUp = require 'powerUp'
 local SoftObject = require 'softObject'
+local Wall = require 'wall'
 local Bomb = require 'bomb'
 
 local Enemy = Object:extend()
@@ -56,92 +57,89 @@ function Enemy:updateIdle(vector)
 end
 
 function isSafe(position)
-	for _, object in ipairs(objects) do
-		-- fix with proper bomb removal so don't need exploded check here
-		if object.is and object:is(Bomb) and not object.exploded then
-			local tiles, collisions = object:checkTiles()
-			for _, tile in ipairs(tiles) do
-				if tile == position then
-					return false
-				end
+	local tile = map:toTile(position)
+	return safetyGrid[tile.y][tile.x] <= 0
+end
+
+function occupied(position, ...)
+	local args = {...}
+	local function filter(item)
+		local result = false
+		for _, objectType in ipairs(args) do
+			if item:is(objectType) then
+				result = true
+				break
 			end
 		end
+		return result
 	end
-	return true
+
+	local items, len = world:queryRect(position.x, position.y, 15, 15, filter)
+	return len ~= 0
 end
 
 function Enemy:findPath(target)
-	local filter = function(item)
-		if item:is(PowerUp) then
-			return false
-		else
-			return true
-		end
-	end
-	local Map = require 'map'
-	local targetTile = nil
-	if target then
-		targetTile = map:toTile(target)
-	end
-	local currentTile = map:toTile(self.position)
+	local targetTile = map:toTile(target)
+	local startTile = map:toTile(self.position)
 
-	local closestPath = nil
-	local seen = {}
-	local queue = {}
-	local neighbors = map:getNeighbors(currentTile:unpack())
-	for _, neighbor in ipairs(neighbors) do
-		local position = map:toWorld(neighbor)
-		local items, len = world:queryRect(position.x, position.y, self.width, self.height, filter)
-		if len == 0 then
-			table.insert(queue, {neighbor})
-		elseif target and items[1]:is(SoftObject) then
-			table.insert(queue, {neighbor})
-		end
-	end
-	while #queue > 0 do
-		local path = table.remove(queue, 1)
-		local node = path[#path]
-		seen[tostring(node)] = true
-		local position = map:toWorld(node)
-		local safe = isSafe(position)
-		local open = false
-		local _, len = world:queryRect(position.x, position.y, self.width, self.height, filter)
-		if len == 0 then
-			open = true
-		end
-		if targetTile then
-			local distance = map:distance(path[#path], targetTile)
-			if closestPath == nil then
-				closestPath = path
-			elseif distance < map:distance(closestPath[#closestPath], targetTile) then
-				closestPath = path
-			end
-		end
-		if targetTile and node == targetTile then
-			return path
-		elseif targetTile == nil and safe and open then
-			return path
-		else
-			local neighbors = map:getNeighbors(node:unpack())
-			for _, neighbor in ipairs(neighbors) do
-				if not seen[tostring(neighbor)] and neighbor ~= currentTile then
-					local position = map:toWorld(neighbor)
-					local items, len = world:queryRect(position.x, position.y, self.width, self.height, filter)
-					if len == 0 then
-						local newPath = {unpack(path)}
-						table.insert(newPath, neighbor)
-						table.insert(queue, newPath)
-					elseif targetTile and items[1]:is(SoftObject) then
-						local newPath = {unpack(path)}
-						table.insert(newPath, neighbor)
-						return newPath
-						--table.insert(queue, newPath)
-					end
+	local closed = {}
+	local open = {startTile}
+	local nodes = {
+		[tostring(startTile)] = {
+			pos = startTile,
+			gcost = 0,
+			hcost = map:distance(startTile, targetTile),
+			parent = nil,
+		},
+	}
+
+	while open[1] ~= targetTile and #open > 0 do
+		local pos = table.remove(open, 1)
+		local current = nodes[tostring(pos)]
+		closed[tostring(current.pos)] = true
+
+		local neighbors = map:getNeighbors(pos:unpack())
+		for _, neighbor in ipairs(neighbors) do
+			-- ignoring bomb if neighbor position is the target position
+			-- otherwise, would never be able to find the target position
+			if neighbor == targetTile or not occupied(map:toWorld(neighbor), Wall, Bomb) then
+				local cost = current.gcost + 1
+				local node = nodes[tostring(neighbor)]
+				local isClosed = closed[tostring(neighbor)]
+				if node and cost < node.gcost then
+					node.gcost = cost
+					node.parent = current
+				end
+				if not node and not isClosed then
+					table.insert(open, neighbor)
+					nodes[tostring(neighbor)] = {
+						pos = neighbor,
+						gcost = cost,
+						hcost = map:distance(neighbor, targetTile),
+						parent = current,
+					}
 				end
 			end
 		end
+
+		-- rank open nodes
+		table.sort(open, function(a, b)
+			local nodeA = nodes[tostring(a)]
+			local nodeB = nodes[tostring(b)]
+			return (nodeA.gcost + nodeA.hcost) < (nodeB.gcost + nodeB.hcost)
+		end)
 	end
-	return closestPath
+
+	local path = {}
+	local current = nodes[tostring(open[1])]
+	if not current then
+		return path
+	end
+	while current.parent ~= nil do
+		table.insert(path, map:toWorld(current.pos))
+		current = current.parent
+	end
+	return path
 end
 
 function Enemy:placeBomb()
@@ -152,46 +150,64 @@ function Enemy:placeBomb()
 	end
 end
 
+function Enemy:findSafeTile()
+	local tile = map:toTile(self.position)
+
+	local seen = {}
+	local queue = {tile}
+	while #queue > 0 do
+		local current = table.remove(queue, 1)
+		seen[tostring(current)] = true
+
+		if isSafe(map:toWorld(current)) then
+			return map:toWorld(current)
+		end
+
+		local neighbors = map:getNeighbors(current:unpack())
+		for _, neighbor in ipairs(neighbors) do
+			local tileType = map.tiles[neighbor.y][neighbor.x]
+			if tileType ~= map.WALL and tileType ~= map.OUTER_WALL then
+				if not seen[tostring(neighbor)] and not occupied(map:toWorld(neighbor), Wall, Bomb, SoftObject) then
+					table.insert(queue, neighbor)
+				end
+			end
+		end
+	end
+end
+
 function Enemy:update(dt)
+	self.onBomb = nil
+	local items, len = world:queryRect(self.position.x, self.position.y, self.width, self.height)
+	for _, item in ipairs(items) do
+		if item:is(Bomb) then
+			self.onBomb = item
+		end
+	end
+
 	local velocity = Vector(0, 0)
 
 	local safe = isSafe(self.position)
 	if not safe then
-		local path = self:findPath()
-		if path and #path > 0 then
-			self.target = map:toWorld(path[1])
-			self.currentPath = nil
-			self.currentIndex = nil
+		local safeTile = self:findSafeTile()
+		if safeTile and (self.target == nil or self.target == self.position) then
+			local path = self:findPath(safeTile)
+			if #path > 0 then
+				self.target = table.remove(path, #path)
+			else
+				self.target = nil
+			end
 		end
 	else
-		-- currently safe, so do something
-		if self.currentPath then
-			if self.position == self.target then
-				self.target = map:toWorld(self.currentPath[self.currentIndex])
-				self.currentIndex = self.currentIndex + 1
-			end
-		elseif not self.target or self.target == self.position then
+		if self.target == nil or self.target == self.position then
 			local path = self:findPath(player.position)
 			if #path > 0 then
-				local newTarget = map:toWorld(path[1])
-				if newTarget and isSafe(newTarget) then
-					self.target = newTarget
-					self.currentPath = path
-					self.currentIndex = 2
+				local target = table.remove(path, #path)
+				-- if already safe, don't move onto unsafe tile
+				if isSafe(target) then
+					self.target = target
 				end
-			end
-		end
-		if self.currentPath and self.currentIndex > #self.currentPath then
-			self.currentIndex = nil
-			self.currentPath = nil
-		end
-	end
-
-	if self.target then
-		local items, len = world:queryRect(self.target.x, self.target.y, self.width, self.height)
-		for _, item in ipairs(items) do
-			if item:is(SoftObject) then
-				self:placeBomb()
+			else
+				self.target = nil
 			end
 		end
 	end
@@ -206,20 +222,30 @@ function Enemy:update(dt)
 		end
 	end
 
+	if self.target then
+		local items, len = world:queryRect(self.target.x, self.target.y, self.width, self.height)
+		for _, item in ipairs(items) do
+			if item:is(SoftObject) then
+				self:placeBomb()
+				-- fixes some weird issue with bump where it is throwing them off the map
+				-- for a single frame when walking repeatedly into a collidable object
+				self.target = nil
+				velocity = Vector(0, 0)
+			end
+		end
+	end
+
 	if velocity ~= Vector(0, 0) then
 		local newPosition = self.position + velocity
 		local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y,
 			function(item, other)
-				if not other.is then
-					return 'slide'
-				elseif other:is(PowerUp) then
+				local Player = require 'player'
+				if other:is(PowerUp) then
 					return 'cross'
-				elseif other:is(Bomb) and other.player == self then
-					if other.underPlayer then
-						return 'cross'
-					else
-						return 'slide'
-					end
+				elseif other:is(Bomb) and self.onBomb == other then
+					return 'cross'
+				elseif other:is(Player) or other:is(Enemy) then
+					return 'cross'
 				else
 					return 'slide'
 				end
@@ -256,6 +282,9 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
+	if self.target then
+		love.graphics.rectangle('line', self.target.x, self.target.y, 15, 15)
+	end
 	self.animations[self.animation]:draw(
 		self.sprite, self.position.x, self.position.y, 0, 1, 1, self.origin.x, self.origin.y
 	)

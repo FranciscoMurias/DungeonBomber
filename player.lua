@@ -14,9 +14,9 @@ function Player:new(x, y)
   self.origin = Vector(2, 6)
   self.direction = Vector(0, 1)
 	self.speed = 40
-	self.maxBombs = 2
+	self.maxBombs = 1
 	self.usedBombs = 0
-	self.bombRadius = 2
+	self.bombRadius = 1
 	self.powerUps = {}
 	self.sprite = love.graphics.newImage('res/sprites/player_sprites.png')
 	self.grid = anim8.newGrid(15, 19, self.sprite:getWidth(), self.sprite:getHeight())
@@ -48,6 +48,14 @@ function Player:new(x, y)
 end
 
 function Player:update(dt)
+	self.onBomb = nil
+	local items, len = world:queryRect(self.position.x, self.position.y, self.width, self.height)
+	for _, item in ipairs(items) do
+		if item:is(Bomb) then
+			self.onBomb = item
+		end
+	end
+
 	local velocity = Vector(0, 0)
 
 	if love.keyboard.isDown('right') then
@@ -66,16 +74,13 @@ function Player:update(dt)
 		local newPosition = self.position + velocity
 		local actualX, actualY, cols, cols_len = world:move(self, newPosition.x, newPosition.y,
 			function(item, other)
-				if not other.is then
-					return 'slide'
-				elseif other:is(PowerUp) then
+				local Enemy = require 'enemy'
+				if other:is(PowerUp) then
 					return 'cross'
-				elseif other:is(Bomb) and other.player == self then
-					if other.underPlayer then
-						return 'cross'
-					else
-						return 'slide'
-					end
+				elseif other:is(Bomb) and self.onBomb == other then
+					return 'cross'
+				elseif other:is(Player) or other:is(Enemy) then
+					return 'cross'
 				else
 					return 'slide'
 				end

@@ -34,6 +34,11 @@ function Bomb:new(player, x, y)
 	})
 
 	world:add(self, self.position.x, self.position.y, self.width, self.height)
+
+	self.affectedTiles, _ = self:checkTiles()
+	for _, tile in ipairs(self.affectedTiles) do
+		safetyGrid[tile.y][tile.x] = safetyGrid[tile.y][tile.x] + 1
+	end
 end
 
 function Bomb:center()
@@ -94,6 +99,11 @@ function Bomb:update(dt)
 		end
 		self.exploded = true
 		world:remove(self)
+
+		for _, tile in ipairs(self.affectedTiles) do
+			safetyGrid[tile.y][tile.x] = safetyGrid[tile.y][tile.x] - 1
+		end
+
 		if self.timer < self.explosionDuration then
 			screen:setShake(10)
 		end
@@ -143,7 +153,7 @@ function Bomb:checkTiles()
 	local Enemy = require 'enemy'
 	local Wall = require 'wall'
 	local collisions = {}
-	local tiles = {self.position}
+	local tiles = {map:toTile(self.position)}
 	local directions = {Vector(0, 1), Vector(0, -1), Vector(1, 0), Vector(-1, 0)}
 
 	local items, _ = world:queryRect(self.position.x, self.position.y, self.width, self.height)
@@ -165,7 +175,7 @@ function Bomb:checkTiles()
 					hit = true
 				end
 			end
-			table.insert(tiles, tile)
+			table.insert(tiles, map:toTile(tile))
 			if hit then break end
 		end
 	end
