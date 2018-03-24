@@ -129,9 +129,18 @@ function love.keypressed(key)
 	elseif key == 'x' then
 		if player.usedBombs < player.maxBombs then
 			local tile = map:toWorld(map:toTile(player.position + Vector(6, 4)))
-			local bomb = Bomb(player, tile.x, tile.y)
-			table.insert(objects, bomb)
-			player.usedBombs = player.usedBombs + 1
+			local occupied = false
+			local items, _ = world:queryRect(tile.x, tile.y, 15, 15)
+			for _, item in ipairs(items) do
+				if item:is(Bomb) then
+					occupied = true
+				end
+			end
+			if not occupied then
+				local bomb = Bomb(player, tile.x, tile.y)
+				table.insert(objects, bomb)
+				player.usedBombs = player.usedBombs + 1
+			end
 		end
 	end
 end
