@@ -25,7 +25,7 @@ debug = false
 function love.load() ----------------------------------------------------------------------------------------
 	world = bump.newWorld()
 
-	map = Map()
+	map = Map('res/maps/dungeon')
 	safetyGrid = {}
 	for y = 1, map.height do
 		safetyGrid[y] = {}
@@ -41,14 +41,14 @@ function love.load() -----------------------------------------------------------
 	enemy3 = Enemy(15, 15 * 11)
 	objects = {player, enemy1, enemy2, enemy3}
 
-	math.randomseed( os.time() )
-	map:foreach(function(x, y, value)
+	math.randomseed(os.time())
+	map:foreach(function(x, y, tile, collidable)
 		local chance = math.random()
-		if value == 0 and chance < 0.7 then
+		if collidable == 0 and not map:isSpawnLocation(x, y) and chance < 0.7 then
 			local softObject = SoftObject((x - 1) * 15, (y - 1) * 15, math.random(1,5))
 			table.insert(objects, softObject)
 			world:add(softObject, softObject.position.x, softObject.position.y, softObject.width, softObject.height)
-		elseif value == 1  or value == -2 then
+		elseif collidable == 1 then
 			local x = x - 1
 			local y = y - 1
 			local wall = Wall(x * 15, y * 15)

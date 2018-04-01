@@ -7,32 +7,25 @@ local Map = Object:extend()
 
 floorTiles = {}
 
-Map.WALL = 1
-Map.OUTER_WALL = -2
+function Map:new(datafile)
+	data = require(datafile)
 
-function Map:new()
   self.width = 19
   self.height = 13
 	self.tilewidth = 15
 	self.tileheight = 15
-	self.background = love.graphics.newImage 'res/tiles/BGArena1.png'
-	self.tiles = {}
-	self.tileset = love.graphics.newImage('res/tiles/tileset_dungeon.png')
-	self.wall = love.graphics.newQuad(15, 0, 15, 17, self.tileset:getWidth(), self.tileset:getHeight())
-	self.floors = {
-		love.graphics.newQuad(0, 0, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
-		love.graphics.newQuad(0, 15, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
-		love.graphics.newQuad(0, 30, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
-		love.graphics.newQuad(0, 45, 15, 15, self.tileset:getWidth(), self.tileset:getHeight()),
-	}
 
-	-- build layout, walls, spawn locations
-	self:generateLayout()
+	self.background = data.background
+	self.tileset = data.tileset
+	self.walls = data.walls
+	self.floors = data.floors
+	self.collidables = data.collidables
+	self.tiles = data.tiles
 
 	-- make random floor pattern
 	self:generateFloorTiles()
 
-	self.floor = love.graphics.newCanvas(self.width * 15, self.height * 14)
+	self.floor = love.graphics.newCanvas(self.width * 15, self.height * 15)
 	-- prerender floor
 	love.graphics.setCanvas(self.floor)
 	self:foreach(function(x, y, value)
@@ -84,24 +77,6 @@ function Map:isSpawnLocation(x, y)
 	return false
 end
 
-function Map:generateLayout()
-	for row = 1, self.height do
-		self.tiles[row] = {}
-		for col = 1, self.width do
-			if col == 1 or col == self.width or row == 1 or row == self.height then
-				self.tiles[row][col] = -2
-			elseif (row  - 1) % 2 == 0 and (col - 1) % 2 == 0 then
-				self.tiles[row][col] = 1
-			else
-				self.tiles[row][col] = 0
-			end
-			if self:isSpawnLocation(col, row) then
-				self.tiles[row][col] = -1
-			end
-		end
-	end
-end
-
 function Map:toTile(position)
 	local x = position.x
 	local y = position.y
@@ -125,7 +100,8 @@ end
 function Map:foreach(fn)
 	for row = 1, self.height do
 		for col = 1, self.width do
-			fn(col, row, self.tiles[row][col])
+			local index = (row - 1) * self.width + col
+			fn(col, row, self.tiles[index], self.collidables[index])
 		end
 	end
 end
@@ -154,11 +130,11 @@ function Map:drawFloor(x, y)
 end
 
 function Map:drawWalls()
-	self:foreach(function(x, y, value)
+	self:foreach(function(x, y, tile)
 		local x = x - 1
 		local y = y - 1
-		if value == 1 then
-			love.graphics.draw(self.tileset, self.wall, x * 15, y * 15 - 2)
+		if tile ~= 0 then
+			love.graphics.draw(self.tileset, self.walls[tile], x * 15, y * 15 - 2)
 		end
 	end)
 end

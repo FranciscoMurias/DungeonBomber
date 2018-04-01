@@ -165,8 +165,9 @@ function Enemy:findSafeTile()
 
 		local neighbors = map:getNeighbors(current:unpack())
 		for _, neighbor in ipairs(neighbors) do
-			local tileType = map.tiles[neighbor.y][neighbor.x]
-			if tileType ~= map.WALL and tileType ~= map.OUTER_WALL then
+			local index = (neighbor.y - 1) * map.width + neighbor.x
+			local isCollidable = map.collidables[index]
+			if isCollidable == 0 then
 				if not seen[tostring(neighbor)] and not occupied(map:toWorld(neighbor), Wall, Bomb, SoftObject) then
 					table.insert(queue, neighbor)
 				end
