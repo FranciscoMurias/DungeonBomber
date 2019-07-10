@@ -259,7 +259,7 @@ function Enemy:update(dt)
 			local other = col.other
 			if other.is and other:is(PowerUp) then
 				other.remove = true
-				audio.collectPowerUp:rewind()
+				audio.collectPowerUp:stop()
 				audio.collectPowerUp:play()
 				if not self.powerUps[other] then
 					self.powerUps[other] = other

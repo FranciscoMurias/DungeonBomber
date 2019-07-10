@@ -15,7 +15,7 @@ width, height = love.graphics.getDimensions()
 screen:setDimensions(width, height)
 
 audio = {
-	battleMusic = love.audio.newSource('res/audio/music/BattleSong1.mp3'),
+	battleMusic = love.audio.newSource('res/audio/music/BattleSong1.mp3', 'static'),
 	explosion = love.audio.newSource('res/audio/sfx/Explosion1.wav', 'static'),
 	collectPowerUp = love.audio.newSource('res/audio/sfx/collectPowerUp.wav', 'static'),
 }
